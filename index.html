@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Submission to CleverTap</title>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        form {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.3);
+        }
+
+        label, input {
+            display: block;
+            margin: 10px auto;
+            font-size: 16px;
+        }
+
+        input {
+            padding: 10px;
+            border: 1px solid white;
+            border-radius: 5px;
+            background: black;
+            color: white;
+        }
+
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: red;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: darkred;
+        }
+
+        #output {
+            margin-top: 20px;
+        }
+        #ct-nativedisplay {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-top: 100px;
+        }
+    </style>
+    <script type="text/javascript">
+        // Initialize CleverTap object
+        var clevertap = { event: [], profile: [], account: [], iLogin: [], notifications: [], privacy: [] };
+
+          // Set dismissSpamControl globally for all notifications
+      clevertap.dismissSpamControl = true;
+        // Replace with your CleverTap account ID and region
+        clevertap.account.push({ "id": "TEST-W4W-59W-7K7Z", "region": "eu1" });
+        clevertap.privacy.push({ optOut: false }); // User has not opted out of data sharing
+        clevertap.privacy.push({ useIP: false }); // Do not use IP for data
+
+        // Load CleverTap SDK
+        (function () {
+            var wzrk = document.createElement('script');
+            wzrk.type = 'text/javascript';
+            wzrk.async = true;
+            wzrk.src = 'https://d2r1yp2w7bby2u.cloudfront.net/js/clevertap.min.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(wzrk, s);
+        })();
+    </script>
+</head>
+<body>
+    <form id="userForm">
+        <h1>User Registration</h1>
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required>
+
+        <label for="membership">Membership Type:</label>
+        <input type="text" id="membership" name="membership" required>
+
+        <button type="button" onclick="submitForm()">Submit</button>
+        <button type="button" id="btn1" onclick="enableNotifications()">Enable Notifications</button>
+        <button type="button" id="btn2" onclick="pushnotification()">Web Push</button>
+        <button type="button" id="btn3" onclick="onPopup()">Popup</button>
+        <button type="button" id="btn4" onclick="exitIntent()">Exit Intent</button>
+        <button type="button" id="btn5" onclick="triggerWebNativeDisplay()">Native Display</button>
+
+
+        <p id="output"></p>
+    </form>
+    <button type="button" onclick="redirectToSecondPage()">Redirect</button>
+x
+      <!-- Div for CleverTap Native Display -->
+      <div id="ct-nativedisplay" style="border: 1px solid #ccc; padding: 10px; margin-top: 20px; width: 400px; height: 400px;">
+        <!-- CleverTap Native Display content will be rendered here -->
+    </div>
+
+    <script>
+        // Function to enable notifications
+        function enableNotifications() {
+            clevertap.notifications.push({
+                titleText: "Would you like to receive Push Notifications?",
+                bodyText: "We promise to only send you relevant updates and offers.",
+                okButtonText: "Allow",
+                rejectButtonText: "No, Thanks",
+                okButtonColor: "#F28046",
+            });
+            alert("Notification subscription dialog triggered!");
+        }
+
+        // Function to submit user data to CleverTap
+        function submitForm() {
+            // Get form data
+            const name = document.getElementById("name").value;
+            const email = document.getElementById("email").value;
+            const membership = document.getElementById("membership").value;
+
+            // Validate inputs
+            if (!name || !email || !membership) {
+                alert("Please fill in all fields!");
+                return;
+            }
+
+            // Send user login data to CleverTap
+            clevertap.onUserLogin.push({
+                "Site": {
+                    "Name": name,
+                    "identity": email,
+                
+                }
+            });
+
+            // Update user profile in CleverTap
+            clevertap.profile.push({
+                "Site": {
+                    "Customer Type": membership,
+                }
+            });
+
+            // Notify the user
+            document.getElementById("output").innerText = "User details submitted to CleverTap!";
+            alert("User details successfully submitted to CleverTap!");
+        }
+
+        function onPopup() {
+            clevertap.event.push("Product Viewed");
+            alert("Popup event triggered!");
+        }
+
+        function exitIntent() {
+            clevertap.event.push("Exit");
+            alert("Exit Intent event triggered!");
+        }
+
+        function pushnotification() {
+            clevertap.event.push("Web Push Triggered");
+            alert("Push Notification event triggered!");
+        }
+
+        function triggerWebNativeDisplay() {
+            // This simulates a "Product Viewed" event
+            clevertap.event.push("Web Event", {});
+
+            // Trigger CleverTap native display with the target div and event-based content
+            clevertap.notifications.push({
+                type: "wzrk_native_display", // Native display type
+                targetDivId: "ct-nativedisplay", // Target div for display
+            });
+
+          //  alert("Native Display triggered! Check the display container.");
+        }    
+        function redirectToSecondPage() {
+            window.location.href = 'second.html';
+        }
+
+    </script>
+</body>
+</html>
